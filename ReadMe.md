@@ -73,7 +73,7 @@ click --mode terminal
 
 | Option | Description |
 |---|---|
-| `-m`, `--mode <global\|terminal>` | Explicitly select operation mode (defaults to auto-detect). |
+| `-m`, `--mode <global\|terminal>` | Explicitly select operation mode (defaults to `global`). |
 | `-s`, `--stop` | Stops any active background instances gracefully. |
 | `-c`, `--config <path>` | Override the default JSON configuration path. |
 | `-v`, `--verbose` | Enable verbose output (prints active devices and keycodes). |
@@ -98,6 +98,70 @@ MechClick uses a JSON configuration file to map hardware keycodes to specific `.
 
 - **`defaults`**: An array of fallback sound files to play randomly if a specific keycode mapping is not found.
 - **`mappings`**: A dictionary mapping Linux input event codes (integers) to specific sound filenames.
+
+## Troubleshooting
+
+### "No keyboard devices found!" in Global Mode
+
+Your user is not in the `input` group. Fix:
+
+```bash
+sudo usermod -aG input $USER
+```
+
+Then **log out and log back in** (or reboot) for the change to take effect.
+
+### Toggle does not stop sounds
+
+If pressing the toggle keybind shows "Disabled" but sounds keep playing, kill any lingering processes and restart:
+
+```bash
+pkill -f "click --mode"
+rm -f /tmp/mechclick.pid /tmp/mechclick.pid.children
+rmdir /tmp/mechclick.lock 2>/dev/null
+```
+
+Then run `click` again.
+
+### Terminal mode gives "stdin is not a tty"
+
+You are running terminal mode from a non-interactive context (script, subprocess, keybind that doesn't preserve the terminal). Run it directly in your terminal:
+
+```bash
+click --mode terminal
+```
+
+### evtest permission denied
+
+Make sure you are not running as root. Run as your normal user. If you still get permission errors, verify you are in the `input` group:
+
+```bash
+groups $USER
+```
+
+### No sound plays
+
+Check that an audio player is installed. MechClick tries these in order: `aplay`, `paplay`, `play` (SoX), `ffplay`, `afplay`.
+
+```bash
+# Arch
+sudo pacman -S alsa-utils
+
+# Debian/Ubuntu
+sudo apt install alsa-utils
+
+# Fedora
+sudo dnf install alsa-utils
+```
+
+### Stale PID file after crash
+
+If MechClick crashed or was killed ungracefully, clean up the PID and lock files:
+
+```bash
+rm -f /tmp/mechclick.pid /tmp/mechclick.pid.children
+rmdir /tmp/mechclick.lock 2>/dev/null
+```
 
 ## Contributing
 
