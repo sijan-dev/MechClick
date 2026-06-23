@@ -24,7 +24,7 @@ MechClick relies on standard Unix utilities. The installer will automatically de
 Clone the repository and run the interactive setup script:
 
 ```bash
-git clone https://github.com/Sijan-Bhusal/MechClick.git
+git clone https://github.com/sijan-dev/MechClick.git
 cd MechClick
 chmod +x install.sh
 ./install.sh
